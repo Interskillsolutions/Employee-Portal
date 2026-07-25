@@ -227,6 +227,7 @@ class AttendanceService {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
+      timeZone: 'Asia/Kolkata',
     });
 
     const newRecordData = {
@@ -291,6 +292,7 @@ class AttendanceService {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
+      timeZone: 'Asia/Kolkata',
     });
 
     // Update Daily Action Plan remarks and metrics if exists
