@@ -174,7 +174,7 @@ const GeoClockInModal = ({ open, onClose, onClockInSuccess }) => {
     };
 
     const res = await dispatch(clockInThunk(payload));
-    if (!res.error) {
+    if (res.meta?.requestStatus === 'fulfilled') {
       if (onClockInSuccess) onClockInSuccess();
       if (onClose) onClose();
     }
