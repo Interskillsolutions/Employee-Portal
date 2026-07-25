@@ -86,6 +86,7 @@ const DailyPlannerPage = () => {
             category: t.category || 'Calls',
             priority: t.priority || 'Medium',
             status: t.status || 'Pending',
+            assignedBy: t.assignedBy || '',
             displayOrder: idx,
           }))
         );
@@ -147,6 +148,7 @@ const DailyPlannerPage = () => {
           category: t.category || 'Calls',
           priority: t.priority || 'Medium',
           status: t.status || 'Pending',
+          assignedBy: t.assignedBy || '',
           displayOrder: idx,
         }))
       );
@@ -513,6 +515,15 @@ const DailyPlannerPage = () => {
                       <Typography variant="body2" color="#64748B" sx={{ fontSize: '0.8125rem', mt: 0.25 }}>
                         {task.description}
                       </Typography>
+                    )}
+                    {task.assignedBy && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
+                        <Chip
+                          label={`Assigned by ${task.assignedBy}`}
+                          size="small"
+                          sx={{ backgroundColor: '#EFF6FF', color: '#2563EB', fontWeight: 600, fontSize: '0.72rem', height: 22 }}
+                        />
+                      </Box>
                     )}
                   </Box>
                 </Box>
