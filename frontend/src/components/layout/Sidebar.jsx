@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, useTheme, useMediaQuery } from '@mui/material';
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setActiveRouteTitle } from '../../store/slices/uiSlice';
+import { setActiveRouteTitle, toggleSidebar } from '../../store/slices/uiSlice';
 
 const SIDEBAR_WIDTH = 260;
 
@@ -52,6 +52,9 @@ const Sidebar = () => {
   const sidebarOpen = useSelector((state) => state.ui.sidebarOpen);
   const user = useSelector((state) => state.auth.user);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const roleName = user?.role?.name || user?.role || 'Employee';
   const isManager = roleName === 'Manager' || roleName === 'Admin';
   const isAdmin = roleName === 'Admin';
@@ -59,6 +62,9 @@ const Sidebar = () => {
   const handleNavigation = (path, title) => {
     dispatch(setActiveRouteTitle(title));
     navigate(path);
+    if (isMobile && sidebarOpen) {
+      dispatch(toggleSidebar());
+    }
   };
 
   const renderNavGroup = (items, groupTitle) => (
@@ -127,11 +133,13 @@ const Sidebar = () => {
 
   return (
     <Drawer
-      variant="persistent"
+      variant={isMobile ? "temporary" : "persistent"}
       anchor="left"
       open={sidebarOpen}
+      onClose={isMobile ? () => dispatch(toggleSidebar()) : undefined}
+      ModalProps={isMobile ? { keepMounted: true } : undefined}
       sx={{
-        width: sidebarOpen ? SIDEBAR_WIDTH : 0,
+        width: sidebarOpen && !isMobile ? SIDEBAR_WIDTH : 0,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: SIDEBAR_WIDTH,

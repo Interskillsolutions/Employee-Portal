@@ -69,7 +69,7 @@ const Navbar = () => {
             <MenuIcon size={22} />
           </IconButton>
 
-          <Typography variant="h3" fontWeight={700} color="#0F172A">
+          <Typography variant="h3" fontWeight={700} color="#0F172A" sx={{ fontSize: { xs: '1.05rem', sm: '1.35rem', md: '1.5rem' }, noWrap: true }}>
             {activeRouteTitle}
           </Typography>
         </Box>
