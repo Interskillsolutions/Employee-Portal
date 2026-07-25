@@ -22,6 +22,17 @@ connectDB().then(() => {
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 
+// Base Root Greeting Route
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 4rem 2rem;">
+      <h1 style="color: #2563EB;">InterSkill Solutions Employee Portal API is live!</h1>
+      <p style="color: #475569; font-size: 1.1rem;">The backend service is up and running successfully.</p>
+      <a href="/api/v1/health" style="display: inline-block; background: #2563EB; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 1rem;">Check Health Status</a>
+    </div>
+  `);
+});
+
 // Base Health Check
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({
