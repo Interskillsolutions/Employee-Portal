@@ -12,13 +12,15 @@ import {
   Snackbar,
   InputAdornment,
   IconButton,
+  LinearProgress,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
-import { Briefcase, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Briefcase, Eye, EyeOff, Lock, Mail, Wifi, WifiOff, CheckCircle2 } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import CustomButton from '../../components/common/Button';
 import { motion } from 'framer-motion';
+import axiosInstance from '../../services/axiosInstance';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -27,6 +29,71 @@ const LoginPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  const [progress, setProgress] = useState(0);
+  const [healthStatus, setHealthStatus] = useState('checking'); // 'checking' | 'waking' | 'active'
+  const [statusMessage, setStatusMessage] = useState('Welcome to InterSkill Solutions...');
+
+  const statusPhrases = [
+    'Welcome to InterSkill Solutions...',
+    'Checking internet connection...',
+    'Render free tier server is waking up. Please hold on...',
+    'Initializing database handshake...',
+    'Waking up cloud services (takes up to 50 seconds)...',
+    'Almost ready, setting up portal configurations...',
+    'Connecting securely to employee directory...',
+  ];
+
+  useEffect(() => {
+    let phraseIndex = 0;
+    const phraseInterval = setInterval(() => {
+      if (healthStatus !== 'active') {
+        phraseIndex = (phraseIndex + 1) % statusPhrases.length;
+        setStatusMessage(statusPhrases[phraseIndex]);
+      }
+    }, 6000);
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (healthStatus === 'active') return 100;
+        if (prev >= 95) return 95; // Hold at 95% until active
+        return prev + 2.5; // Increments to 95% over ~38 seconds
+      });
+    }, 1000);
+
+    const checkServerHealth = async () => {
+      try {
+        const response = await axiosInstance.get('/health');
+        if (response.status === 'success' || response.timestamp) {
+          setHealthStatus('active');
+          setProgress(100);
+          setStatusMessage('Server Active & Connected!');
+          clearInterval(phraseInterval);
+          clearInterval(progressInterval);
+        }
+      } catch (err) {
+        setHealthStatus('waking');
+      }
+    };
+
+    // Initial check
+    checkServerHealth();
+
+    // Check health every 4 seconds
+    const healthInterval = setInterval(() => {
+      if (healthStatus !== 'active') {
+        checkServerHealth();
+      } else {
+        clearInterval(healthInterval);
+      }
+    }, 4000);
+
+    return () => {
+      clearInterval(phraseInterval);
+      clearInterval(progressInterval);
+      clearInterval(healthInterval);
+    };
+  }, [healthStatus]);
 
   const from = location.state?.from?.pathname || '/dashboard';
 
@@ -240,6 +307,44 @@ const LoginPage = () => {
                   <Typography variant="caption" color="#64748B" display="block">
                     • Admin: <strong>admin@interskill.com</strong> / <strong>Password@123</strong>
                   </Typography>
+                </Box>
+
+                {/* Server Status Checker Widget */}
+                <Box
+                  sx={{
+                    mt: 1.5,
+                    p: 2,
+                    borderRadius: '10px',
+                    backgroundColor: healthStatus === 'active' ? '#ECFDF5' : '#FFFBEB',
+                    border: healthStatus === 'active' ? '1px solid #A7F3D0' : '1px solid #FDE68A',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {healthStatus === 'active' ? (
+                        <CheckCircle2 size={16} color="#059669" />
+                      ) : (
+                        <Wifi size={16} color="#D97706" style={{ animation: 'pulse 1.5s infinite' }} />
+                      )}
+                      <Typography variant="caption" fontWeight={700} color={healthStatus === 'active' ? '#065F46' : '#92400E'}>
+                        {statusMessage}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" fontWeight={800} color={healthStatus === 'active' ? '#065F46' : '#92400E'}>
+                      {Math.round(progress)}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={progress}
+                    color={healthStatus === 'active' ? 'success' : 'warning'}
+                    sx={{
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: healthStatus === 'active' ? '#D1FAE5' : '#FEF3C7',
+                    }}
+                  />
                 </Box>
               </Box>
             </form>
